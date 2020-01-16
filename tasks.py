@@ -63,10 +63,22 @@ def clean(ctx):
     ctx.run('find . | grep .pytest_cache | xargs rm -rf')
 
 
+@task(clean)
+def build(ctx):
+    """Build sdist and wheel."""
+    ctx.run('docker build -t {} src'.format(ctx.docker.name))
+
+
+@task(build)
+def run(ctx):
+    """Run container."""
+    ctx.run('docker run -it {}'.format(ctx.docker.name), pty=True)
+
+
 scm = Collection()
 scm.add_task(scm_init, name="init")
 scm.add_task(scm_push, name="push")
 scm.add_task(scm_status, name="status")
 
-ns = Collection(clean)
+ns = Collection(build, clean, run)
 ns.add_collection(scm, name="scm")

@@ -91,10 +91,16 @@ def lint(ctx):
     ctx.run('pydocstyle src/app/app')
 
 
+@task(clean,test,lint)
+def test_merge(ctx):
+    """Run tests and linters before merging."""
+    pass
+
+
 scm = Collection()
 scm.add_task(scm_init, name="init")
 scm.add_task(scm_push, name="push")
 scm.add_task(scm_status, name="status")
 
-ns = Collection(build, clean, lint, run, test)
+ns = Collection(build, clean, lint, run, test, test_merge)
 ns.add_collection(scm, name="scm")

@@ -1,0 +1,21 @@
+#!/usr/local/bin/python3
+import signal
+import sys
+
+
+def terminateProcess(signalNumber, frame):
+    print ('(SIGTERM) terminating the process')
+    sys.exit()
+
+if __name__ == '__main__':
+    signal.signal(signal.SIGTERM, terminateProcess)
+
+    try:
+        print('Hello World from Docker!')
+        sys.exit()
+
+    except KeyboardInterrupt:
+        sys.exit()
+
+    finally:
+        pass

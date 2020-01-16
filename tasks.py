@@ -63,10 +63,44 @@ def clean(ctx):
     ctx.run('find . | grep .pytest_cache | xargs rm -rf')
 
 
+@task(clean)
+def build(ctx):
+    """Build sdist and wheel."""
+    ctx.run('docker build -t {} src'.format(ctx.docker.name))
+
+
+@task(build)
+def run(ctx):
+    """Run container."""
+    ctx.run('docker run -it {}'.format(ctx.docker.name), pty=True)
+
+
+@task
+def test(ctx):
+    """Run tests."""
+    ctx.run('pylint --errors-only src/app/run')
+    ctx.run('pylint --errors-only src/app/app')
+    ctx.run('pytest src/tests/unit src/tests/integration src/tests/regression')
+
+
+@task
+def lint(ctx):
+    """Run linters."""
+    ctx.run('pylint src/app/app')
+    ctx.run('pycodestyle --max-line-length=120 src/app/app')
+    ctx.run('pydocstyle src/app/app')
+
+
+@task(clean,test,lint)
+def test_merge(ctx):
+    """Run tests and linters before merging."""
+    pass
+
+
 scm = Collection()
 scm.add_task(scm_init, name="init")
 scm.add_task(scm_push, name="push")
 scm.add_task(scm_status, name="status")
 
-ns = Collection(clean)
+ns = Collection(build, clean, lint, run, test, test_merge)
 ns.add_collection(scm, name="scm")

@@ -75,10 +75,18 @@ def run(ctx):
     ctx.run('docker run -it {}'.format(ctx.docker.name), pty=True)
 
 
+@task
+def test(ctx):
+    """Run tests."""
+    ctx.run('pylint --errors-only src/app/run')
+    ctx.run('pylint --errors-only src/app/app')
+    ctx.run('pytest src/tests/unit src/tests/integration src/tests/regression')
+
+
 scm = Collection()
 scm.add_task(scm_init, name="init")
 scm.add_task(scm_push, name="push")
 scm.add_task(scm_status, name="status")
 
-ns = Collection(build, clean, run)
+ns = Collection(build, clean, run, test)
 ns.add_collection(scm, name="scm")

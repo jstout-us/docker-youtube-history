@@ -1,0 +1,23 @@
+# KDE Dolphin
+.directory
+
+# Mac OSX
+.DS_Store
+
+#Vagrant files
+/.vagrant
+/*.log
+
+# Python Testing
+.tox
+.pytest_cache
+__pycache__
+*.egg-info
+.coverage
+target/
+build/
+dist/
+stage/
+*.spec
+reports/
+

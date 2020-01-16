@@ -1,0 +1,5 @@
+scm:
+    type:               git
+    repo_owner:         jstout-us
+    repo_slug:          docker-youtube-history
+    version_tag_prefix: v_

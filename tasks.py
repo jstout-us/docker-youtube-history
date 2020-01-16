@@ -83,10 +83,18 @@ def test(ctx):
     ctx.run('pytest src/tests/unit src/tests/integration src/tests/regression')
 
 
+@task
+def lint(ctx):
+    """Run linters."""
+    ctx.run('pylint src/app/app')
+    ctx.run('pycodestyle --max-line-length=120 src/app/app')
+    ctx.run('pydocstyle src/app/app')
+
+
 scm = Collection()
 scm.add_task(scm_init, name="init")
 scm.add_task(scm_push, name="push")
 scm.add_task(scm_status, name="status")
 
-ns = Collection(build, clean, run, test)
+ns = Collection(build, clean, lint, run, test)
 ns.add_collection(scm, name="scm")

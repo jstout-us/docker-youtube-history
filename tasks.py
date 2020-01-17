@@ -78,9 +78,13 @@ def run(ctx):
 @task
 def test(ctx):
     """Run tests."""
+    env = {
+        'PYTHONPATH': 'src/app'
+        }
+
     ctx.run('pylint --errors-only src/app/run')
     ctx.run('pylint --errors-only src/app/app')
-    ctx.run('pytest src/tests/unit src/tests/integration src/tests/regression')
+    ctx.run('pytest src/tests/unit src/tests/integration src/tests/regression', env=env)
 
 
 @task

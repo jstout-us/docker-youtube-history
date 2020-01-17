@@ -11,10 +11,8 @@ from bs4 import SoupStrainer
 from dateutil import parser
 from dateutil import tz
 
-from pprint import pprint as pp
-
 logging.getLogger('foo').addHandler(logging.NullHandler())
-logger = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)    # pylint: disable=invalid-name
 
 MONTHS_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 TIMEZONES = {
@@ -29,7 +27,6 @@ class DeletedVideoError(Exception):
 
 def _filter_unique(videos):
     unique = OrderedDict()
-    duplicates = 0
 
     for video in videos:
         unique[video['vid_id']] = video
@@ -57,7 +54,7 @@ def _parse_url_tag(tag):
 def _parse_watched(txt):
     logger.debug('_parse_watched() - enter')
 
-    txt = txt.replace('\n','').rstrip()
+    txt = txt.replace('\n', '').rstrip()
     idx_left = sorted([x for x in [txt.rfind(y) for y in MONTHS_SHORT] if x > -1],
                       reverse=True)[0]
     idx_right = txt.rfind(' ')
@@ -135,8 +132,6 @@ def parse_history(path):
     stats['unique'] = len(videos)
     stats['duplicates'] = stats['total'] - stats['unique']
     stats['time_first'] = videos[0]['watched']
-
-
     stats['time_last'] = videos[-1]['watched']
 
     return (videos, stats)

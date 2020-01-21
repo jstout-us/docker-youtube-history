@@ -2,20 +2,37 @@
 import signal
 import sys
 
+from app import api
+from app.exceptions import NotAuthenticatedError
+
 
 def terminateProcess(signalNumber, frame):
-    print ('(SIGTERM) terminating the process')
     sys.exit()
+
 
 if __name__ == '__main__':
     signal.signal(signal.SIGTERM, terminateProcess)
+    export_on_exit = True
 
     try:
-        print('Hello World from Docker!')
+        api.setup()
+        api.test_auth()
+
+        tasks = api.load_tasks()
+        api.run(tasks)
+
         sys.exit()
 
     except KeyboardInterrupt:
         sys.exit()
 
+    except NotAuthenticatedError:
+        export_on_exit = False
+        sys.exit(1)
+
+    except Exception:
+        sys.exit(1)
+
     finally:
-        pass
+        if export_on_exit:
+            api.export()

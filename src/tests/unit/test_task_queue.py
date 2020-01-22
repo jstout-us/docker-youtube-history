@@ -34,3 +34,17 @@ def test_load(tmp_path, fix_task_list):
     tasks = task_queue.load(queue_file)
 
     assert task_list[-1:] == tasks
+
+
+def test_save(tmp_path, fix_task_list):
+    queue_file = tmp_path / 'task.queue'
+
+    task_queue.save(queue_file, *fix_task_list[:2])
+
+    result = []
+
+    with queue_file.open() as fd_in:
+        for line in fd_in:
+            result.append(json.loads(line))
+
+    assert fix_task_list[:2] == result

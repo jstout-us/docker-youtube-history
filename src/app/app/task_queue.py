@@ -47,5 +47,7 @@ def load(path):
     return [x for x in tasks.values() if x['state'] not in ('failed', 'ok')]
 
 
-def save(path, *args):
-    pass
+def save(path, *tasks):
+    with path.open('a') as fd_out:
+        for task in tasks:
+            fd_out.write('{}\n'.format(json.dumps(task)))

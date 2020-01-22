@@ -20,20 +20,21 @@ def test_load_tasks(tmp_path, fix_task_list):
         }
 
     with patch.dict(settings.config, config):
-        tasks = api.load_tasks()
+        with patch('app.util.get_timestamp_utc') as mock_f:
+            mock_f.return_value = '1970-01-01T00:00:00Z'
+            tasks = api.load_tasks()
 
-        queue = []
-        with config['file_task_queue'].open() as fd_in:
-            for line in fd_in:
-                queue.append(json.loads(line))
+            queue = []
+            with config['file_task_queue'].open() as fd_in:
+                for line in fd_in:
+                    queue.append(json.loads(line))
 
-        assert expected_tasks == tasks
-        assert expected_queue == queue
+            assert fix_task_list == tasks
 
-        # Verify existing file not overwritten
-        queue_stat = config['file_task_queue'].stat()
-        api.load_tasks()
-        assert queue_stat == config['file_task_queue'].stat()
+            # Verify existing file not overwritten
+            queue_stat = config['file_task_queue'].stat()
+            api.load_tasks()
+            assert queue_stat == config['file_task_queue'].stat()
 
 
 def test_setup(tmp_path):

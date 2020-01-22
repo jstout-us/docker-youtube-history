@@ -5,7 +5,6 @@ import itertools
 import json
 from collections import OrderedDict
 
-from app import settings
 from app import util
 
 
@@ -16,6 +15,14 @@ TEMPLATE_TASK = {
 
 
 def create_tasks(videos):
+    """Create a list of task objects from list of video objects.
+
+    Args:
+        videos(list):   List of video dictionaries
+
+    Returns;
+        tasks(list):    List of task dictionaries.
+    """
     chan_ = OrderedDict()
     vid_ = OrderedDict()
 
@@ -38,6 +45,14 @@ def create_tasks(videos):
 
 
 def load(path):
+    """Load tasks from task queue file.
+
+    Args:
+        path(Path): path to task.queue file
+
+    Returns:
+        tasks(list): list of active task dictionaries
+    """
     tasks = {}
     with path.open() as fd_in:
         for line in fd_in:
@@ -48,6 +63,15 @@ def load(path):
 
 
 def save(path, *tasks):
+    """Save task dictionaries to disk.
+
+    Args:
+        path(Path):     path to task.queue file
+        tasks(dict):    One or more task dictionaries
+
+    Returns:
+        None
+    """
     with path.open('a') as fd_out:
         for task in tasks:
             fd_out.write('{}\n'.format(json.dumps(task)))

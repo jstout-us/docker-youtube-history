@@ -8,6 +8,11 @@ from . import settings
 
 
 def get_timestamp_utc():
+    """Return formated ISO formated UTC timestamp.
+
+    Returns
+        timestamp(str)
+    """
     return datetime.utcnow().strftime(settings.TIMESTAMP_ISO_FORMAT)
 
 

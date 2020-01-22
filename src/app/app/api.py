@@ -11,6 +11,11 @@ from .settings import config
 
 
 def load_tasks():
+    """Load tasks from task queue or generated from watched-history.html.
+
+    Returns:
+        tasks(list):    List of task dictionaries
+    """
     try:
         tasks = task_queue.load(config['file_task_queue'])
 

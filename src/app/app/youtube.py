@@ -42,6 +42,14 @@ def _parse_watched(text):
 
 
 def parse_history(path):
+    """Parse youtube watched-history.html.
+
+    Args:
+        path(Path):     path to watched-history file
+
+    Returns:
+        videos(list):   List of video dictionaries.
+    """
     videos = []
 
     kwargs = {"class": "content-cell mdl-cell mdl-cell--6-col mdl-typography--body-1"}
@@ -60,7 +68,6 @@ def parse_history(path):
 
         except IndexError:
             data['chan_id'], data['chan_title'] = None, None
-
 
         if 'vid_id' in data:
             videos.append(data)

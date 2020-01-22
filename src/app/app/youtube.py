@@ -62,7 +62,7 @@ def parse_history(path):
             data['chan_id'], data['chan_title'] = None, None
 
 
-        if data['vid_id']:
+        if 'vid_id' in data:
             videos.append(data)
 
     return videos

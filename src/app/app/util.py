@@ -7,6 +7,25 @@ from datetime import datetime
 from . import settings
 
 
+def get_sleep_time(time_start, time_now, poll_int):
+    """Calculate time to sleep.
+
+    Args:
+        time_start(datetime):   Time loop started
+        time_now(datetime):     Current time
+        poll_int(int):          Poll interval in seconds
+
+    Returns:
+        sleep_time(float)
+    """
+    time_sleep = poll_int - (time_now - time_start).total_seconds()
+
+    if time_sleep < 0:
+        time_sleep = 0
+
+    return time_sleep
+
+
 def get_timestamp_utc():
     """Return formated ISO formated UTC timestamp.
 

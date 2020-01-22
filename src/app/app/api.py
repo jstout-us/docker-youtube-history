@@ -1,7 +1,13 @@
 # -*- coding: utf-8 -*-
 
 """Module app.api."""
+import collections
+import time
+from datetime import datetime
+from httplib2 import ServerNotFoundError
 from pathlib import Path
+
+from googleapiclient.errors import HttpError
 
 from . import task_queue
 from . import util
@@ -25,6 +31,53 @@ def load_tasks():
         task_queue.save(config['file_task_queue'], *tasks)
 
     return tasks
+
+
+def run(tasks):
+    """Run tasks.
+
+    Args:
+        tasks(list):    Task objects
+
+    Returns:
+        None
+    """
+    queue = collections.deque(tasks)
+
+    while queue:
+        time_start = datetime.now()
+        task = queue.pop()
+        task['retry'] -= 1
+
+        try:
+            token = util.load_file(config['file_token'])
+            # token = youtube.token_refresh(token)
+            # util.save_file(config['file_token'], token)
+
+            # result = youtube.get(token, task['kind'], task['id'])
+            task['status'] = 'ok'
+
+            # util.save_file(config['file_token'] / 'result.json',
+            #                result,
+            #                prefix=util.get_filename_prefix
+            #                )
+
+        except (NotAuthenticatedError, ServerNotFoundError, HttpError):
+            if task['retry']:
+                task['status'] = 'error'
+                queue.appendleft(task)
+
+            else:
+                task['status'] = 'failed'
+
+        except Exception:
+            pass
+
+        finally:
+            task_queue.save(config['file_task_queue'], task)
+
+        time_sleep = util.get_sleep_time(time_start, datetime.now(), config['api_poll_int'])
+        time.sleep(time_sleep)
 
 
 def setup(**kwargs):

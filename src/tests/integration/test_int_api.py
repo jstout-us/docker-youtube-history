@@ -12,6 +12,45 @@ from app import api
 from app import settings
 from app.exceptions import NotAuthenticatedError
 
+@pytest.fixture
+def fix_timestamp():
+    return '1980-01-01T00:00:00Z'
+
+
+@pytest.fixture
+def fix_run_tasks(fix_task_list, fix_timestamp):
+    tasks = [x.copy() for x in fix_task_list[-3:]]
+
+    updates = [
+        {'state': 'error', 'retry': 1},
+        {'state': 'error', 'retry': 4},
+        {},
+        ]
+
+    for task, update in zip(tasks, updates):
+        task.update(update)
+
+    return tasks
+
+
+@pytest.fixture
+def fix_run_results(fix_task_list, fix_timestamp):
+    tasks = [x.copy() for x in fix_task_list[-3:]]
+    tasks.reverse()
+    tasks.append(fix_task_list[-2].copy())
+
+    updates = [
+        {'state': 'failed', 'retry': 0, 'timestamp': fix_timestamp},
+        {'state': 'error', 'retry': 3, 'timestamp': fix_timestamp},
+        {'state': 'ok', 'retry': 4, 'timestamp': fix_timestamp},
+        {'state': 'ok', 'retry': 2, 'timestamp': fix_timestamp}
+        ]
+
+    for task, update in zip(tasks, updates):
+        task.update(update)
+
+    return tasks
+
 
 def test_load_tasks(tmp_path, fix_task_list):
     config = {
@@ -35,6 +74,26 @@ def test_load_tasks(tmp_path, fix_task_list):
             queue_stat = config['file_task_queue'].stat()
             api.load_tasks()
             assert queue_stat == config['file_task_queue'].stat()
+
+
+def test_run(tmp_path, fix_run_tasks, fix_run_results, fix_timestamp):
+    config = {
+        'api_poll_int': 0,
+        'file_task_queue': tmp_path / 'task.queue'
+        }
+
+    with patch.dict(settings.config, config):
+        with patch('app.util.get_timestamp_utc') as mock_f:
+            mock_f.return_value = fix_timestamp
+
+            api.run(fix_run_tasks)
+
+            results = []
+            with config['file_task_queue'].open() as fd_in:
+                for line in fd_in:
+                    results.append(json.loads(line))
+
+            assert fix_run_results == results
 
 
 def test_setup(tmp_path):

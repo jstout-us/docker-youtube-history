@@ -3,9 +3,23 @@
 """Module app.api."""
 from pathlib import Path
 
-from . import settings
+from . import task_queue
 from . import util
+from . import youtube
 from .exceptions import NotAuthenticatedError
+from .settings import config
+
+
+def load_tasks():
+    try:
+        tasks = task_queue.load(config['file_task_queue'])
+
+    except FileNotFoundError:
+        videos = youtube.parse_history(config['file_history'])
+        tasks = task_queue.create_tasks(videos)
+        task_queue.save(config['file_task_queue'], *tasks)
+
+    return tasks
 
 
 def setup(**kwargs):
@@ -38,7 +52,7 @@ def setup(**kwargs):
     cfg_update['dir_work_data'].mkdir(parents=True, exist_ok=True)
     cfg_update['dir_work_var'].mkdir(parents=True, exist_ok=True)
 
-    settings.config.update(cfg_update)
+    config.update(cfg_update)
 
 
 def test_auth():
@@ -48,7 +62,7 @@ def test_auth():
         NotAuthenticatedError:  Authentication token not found.
     """
     try:
-        util.load_file(settings.config['file_token'])
+        util.load_file(config['file_token'])
 
     except FileNotFoundError:
         raise NotAuthenticatedError

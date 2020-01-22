@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 """Test module doc string."""
+import json
 import pickle
 from pathlib import Path
 from unittest.mock import patch
@@ -10,6 +11,31 @@ import pytest
 from app import api
 from app import settings
 from app.exceptions import NotAuthenticatedError
+
+
+def test_load_tasks(tmp_path, fix_task_list):
+    config = {
+        'file_history': Path('src/tests/_fixtures/files/watch-history.html'),
+        'file_task_queue': tmp_path / 'task.queue'
+        }
+
+    with patch.dict(settings.config, config):
+        with patch('app.util.get_timestamp_utc') as mock_f:
+            mock_f.return_value = '1970-01-01T00:00:00Z'
+            tasks = api.load_tasks()
+
+            queue = []
+            with config['file_task_queue'].open() as fd_in:
+                for line in fd_in:
+                    queue.append(json.loads(line))
+
+            assert fix_task_list == tasks
+
+            # Verify existing file not overwritten
+            queue_stat = config['file_task_queue'].stat()
+            api.load_tasks()
+            assert queue_stat == config['file_task_queue'].stat()
+
 
 def test_setup(tmp_path):
 

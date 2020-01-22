@@ -8,10 +8,7 @@ import pytest
 
 from app import task_queue
 
-"""
-with patch('app.youtube._get_youtube') as mock_get_yt:
-        mock_get_yt.side_effect = [resp_valid, resp_empty]
-"""
+
 def test_create_tasks(fix_task_list, fix_video_list):
     with patch('app.util.get_timestamp_utc') as mock_f:
         mock_f.return_value = '1970-01-01T00:00:00Z'

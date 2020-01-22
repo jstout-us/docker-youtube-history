@@ -7,6 +7,7 @@ from . import settings
 from . import util
 from .exceptions import NotAuthenticatedError
 
+
 def setup(**kwargs):
     """Configure app.
 
@@ -41,6 +42,11 @@ def setup(**kwargs):
 
 
 def test_auth():
+    """Load token file to verify authecation status.
+
+    Raises:
+        NotAuthenticatedError:  Authentication token not found.
+    """
     try:
         util.load_file(settings.config['file_token'])
 

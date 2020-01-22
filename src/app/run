@@ -3,7 +3,7 @@ import signal
 import sys
 
 from app import api
-# from app.exceptions import NotAuthenticatedError
+from app.exceptions import NotAuthenticatedError
 
 
 def terminateProcess(signalNumber, frame):
@@ -16,9 +16,9 @@ if __name__ == '__main__':
 
     try:
         api.setup()
-        # api.test_auth()
+        api.test_auth()
 
-        # tasks = api.load_tasks()
+        tasks = api.load_tasks()
         # api.run(tasks)
 
         sys.exit()
@@ -26,9 +26,9 @@ if __name__ == '__main__':
     except KeyboardInterrupt:
         sys.exit()
 
-    # except NotAuthenticatedError:
-    #     export_on_exit = False
-    #     sys.exit(1)
+    except NotAuthenticatedError:
+        export_on_exit = False
+        sys.exit(1)
 
     except Exception:
         sys.exit(1)

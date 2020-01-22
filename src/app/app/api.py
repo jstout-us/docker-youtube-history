@@ -4,6 +4,8 @@
 from pathlib import Path
 
 from . import settings
+from . import util
+from .exceptions import NotAuthenticatedError
 
 
 def setup(**kwargs):
@@ -37,3 +39,16 @@ def setup(**kwargs):
     cfg_update['dir_work_var'].mkdir(parents=True, exist_ok=True)
 
     settings.config.update(cfg_update)
+
+
+def test_auth():
+    """Load token file to verify authecation status.
+
+    Raises:
+        NotAuthenticatedError:  Authentication token not found.
+    """
+    try:
+        util.load_file(settings.config['file_token'])
+
+    except FileNotFoundError:
+        raise NotAuthenticatedError

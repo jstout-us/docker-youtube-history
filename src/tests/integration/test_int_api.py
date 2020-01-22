@@ -1,13 +1,15 @@
 # -*- coding: utf-8 -*-
 
 """Test module doc string."""
+import pickle
 from pathlib import Path
+from unittest.mock import patch
 
 import pytest
 
 from app import api
 from app import settings
-
+from app.exceptions import NotAuthenticatedError
 
 def test_setup(tmp_path):
 
@@ -36,3 +38,16 @@ def test_setup(tmp_path):
     assert expected_config == settings.config
     assert expected_config['dir_work_data'].is_dir()
     assert expected_config['dir_work_var'].is_dir()
+
+
+def test_test_auth(tmp_path):
+    file_token = tmp_path / 'token.pkl'
+
+    with patch.dict(settings.config, {'file_token': file_token}):
+        with pytest.raises(NotAuthenticatedError):
+            api.test_auth()
+
+        with file_token.open('wb') as fd_out:
+            pickle.dump({'one': 1}, fd_out)
+
+        api.test_auth()

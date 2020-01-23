@@ -12,6 +12,7 @@ from app import api
 from app import settings
 from app.exceptions import NotAuthenticatedError
 
+
 @pytest.fixture
 def fix_timestamp():
     return '1980-01-01T00:00:00Z'
@@ -76,11 +77,15 @@ def test_load_tasks(tmp_path, fix_task_list):
             assert queue_stat == config['file_task_queue'].stat()
 
 
-def test_run(tmp_path, fix_run_tasks, fix_run_results, fix_timestamp):
+def test_run(tmp_path, fix_run_tasks, fix_run_results, fix_timestamp, fix_auth_token):
     config = {
         'api_poll_int': 0,
-        'file_task_queue': tmp_path / 'task.queue'
+        'file_task_queue': tmp_path / 'task.queue',
+        'file_token': tmp_path / 'token.pkl'
         }
+
+    with config['file_token'].open('wb') as fd_out:
+        pickle.dump(fix_auth_token, fd_out)
 
     with patch.dict(settings.config, config):
         with patch('app.util.get_timestamp_utc') as mock_f:

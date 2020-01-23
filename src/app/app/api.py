@@ -51,8 +51,8 @@ def run(tasks):
 
         try:
             token = util.load_file(config['file_token'])
-            # token = youtube.token_refresh(token)
-            # util.save_file(config['file_token'], token)
+            token = youtube.refresh_token(token)
+            util.save_file(config['file_token'], token)
 
             # result = youtube.get(token, task['kind'], task['id'])
             task['status'] = 'ok'
@@ -70,7 +70,8 @@ def run(tasks):
             else:
                 task['status'] = 'failed'
 
-        except Exception:
+        except Exception as exp:
+            print('exception: {}'.format(exp))
             pass
 
         finally:

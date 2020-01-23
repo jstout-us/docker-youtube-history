@@ -1,11 +1,41 @@
 # -*- coding: utf-8 -*-
 
 """Test module doc string."""
+import json
+from pathlib import Path
+from unittest.mock import patch
 from unittest.mock import MagicMock
 
 import pytest
 
 from app import youtube
+from app.exceptions import EmptyResponseError
+
+
+@pytest.fixture
+def fix_empty_resp():
+    with Path('src/tests/_fixtures/files/youtube_empty_response.json').open() as fd_in:
+        fixture = json.load(fd_in)
+
+    return fixture
+
+
+@pytest.fixture
+def fix_valid_resp():
+    with Path('src/tests/_fixtures/files/youtube_valid_response.json').open() as fd_in:
+        fixture = json.load(fd_in)
+
+    return fixture
+
+
+def test_get(fix_auth_token, fix_empty_resp, fix_valid_resp):
+    with patch('app.youtube._get_youtube') as mock_get_yt:
+        mock_get_yt.side_effect = [fix_valid_resp, fix_empty_resp]
+
+        assert youtube.get('token', 'type', 'id')
+
+        with pytest.raises(EmptyResponseError):
+            youtube.get('token', 'type', 'id')
 
 
 def test_parse_url_tag():
@@ -54,3 +84,20 @@ def test_parse_watched():
     result = youtube._parse_watched(txt)
 
     assert expect == result
+
+
+def test_refresh_token():
+    token_mock = MagicMock()
+    token_mock.expired = False
+    token_mock.refresh_token = False
+    token_mock.refresh = MagicMock()
+
+    token_mock = youtube.refresh_token(token_mock)
+
+    token_mock.expired = True
+    token_mock = youtube.refresh_token(token_mock)
+
+    token_mock.refresh_token = True
+    token_mock = youtube.refresh_token(token_mock)
+
+    token_mock.refresh.assert_called_once()

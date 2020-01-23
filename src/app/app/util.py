@@ -48,3 +48,17 @@ def load_file(path):
         data = pickle.load(fd_in)
 
     return data
+
+
+def save_file(path, data):
+    """Serialize data and write to disk,
+
+    Args:
+        path(Path): Path to output file
+        data(*):    Any serializable object
+
+    Returns:
+        None
+    """
+    with path.open('wb') as fd_out:
+        pickle.dump(data, fd_out)

@@ -1,4 +1,14 @@
+from collections import namedtuple
+
 import pytest
+
+
+Token = namedtuple('Token', ['expired', 'refresh_token'])
+
+@pytest.fixture
+def fix_auth_token():
+    return Token(False, False)
+
 
 @pytest.fixture
 def fix_task_list():

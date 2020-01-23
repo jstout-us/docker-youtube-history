@@ -3,12 +3,12 @@
 """Test module doc string."""
 import json
 import pickle
+import shutil
 from pathlib import Path
 from unittest.mock import patch
 
 import pytest
 
-import app
 from app import api
 from app import settings
 from app.exceptions import NotAuthenticatedError
@@ -54,6 +54,52 @@ def fix_run_results(fix_task_list, fix_timestamp):
     return tasks
 
 
+@patch('app.util.get_file_timestamp')
+def test_export(fs_mock, tmp_path):
+    fs_mock.return_value = '19800101_000000'
+    config = {
+        'dir_out': tmp_path / 'out',
+        'dir_work': tmp_path / 'work',
+        'dir_work_data': tmp_path / 'work' / 'data',
+        'dir_work_var': tmp_path / 'work' / 'var',
+        'dir_unpack': tmp_path / 'unpack'
+        }
+
+    config['file_log'] = config['dir_work_var'] / 'run.log'
+    config['file_result_1'] = config['dir_work_data'] / 'result_1.txt'
+    config['file_result_2'] = config['dir_work_data'] / 'result_2.txt'
+    config['file_stats'] = config['dir_work'] / 'stats.txt'
+    config['file_task_queue'] = config['dir_work_var'] / 'task.queue'
+    config['file_token'] = config['dir_work_var'] / 'token.pkl'
+
+    for key in [x for x in config.keys() if 'dir_' in x]:
+        config[key].mkdir()
+
+    for key in [x for x in config.keys() if 'file_' in x]:
+        with config[key].open('w') as fd_out:
+            fd_out.write("")
+
+        assert config[key].is_file()
+
+
+
+    with patch.dict(settings.config, config):
+        api.export()
+
+    archive_file = config['dir_out'] / '19800101_000000_youtube_import.zip'
+    assert archive_file.is_file()
+
+    shutil.unpack_archive(str(archive_file), str(config['dir_unpack']))
+    for key in [x for x in config.keys() if 'file_' in x]:
+        path = config['dir_unpack'] / config[key].relative_to(tmp_path)
+
+        if key == 'file_token':
+            assert not path.is_file()
+
+        else:
+            assert path.is_file()
+
+
 def test_load_tasks(tmp_path, fix_task_list):
     config = {
         'file_history': Path('src/tests/_fixtures/files/watch-history.html'),
@@ -83,8 +129,6 @@ def test_load_tasks(tmp_path, fix_task_list):
 @patch('app.util.get_file_timestamp')
 def test_run(fs_mock, ts_mock, yt_mock, tmp_path, fix_run_tasks, fix_run_results, fix_auth_token,
              fix_yt_empty_resp, fix_yt_valid_resp):
-    assert yt_mock is app.youtube._get_youtube
-    assert ts_mock is app.util.get_timestamp_utc
 
     fs_mock.side_effect = ['19800101_000000', '19800101_010000']
     ts_mock.return_value = '1980-01-01T00:00:00Z'

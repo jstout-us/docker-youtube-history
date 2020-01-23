@@ -13,3 +13,10 @@ def test_timestamp_iso_format():
     result = datetime(1970, 1, 2, 1, 2, 3).strftime(settings.TIMESTAMP_ISO_FORMAT)
 
     assert expected == result
+
+
+def test_get_file_timestamp():
+    expected = '19700102_010203'
+    result = datetime(1970, 1, 2, 1, 2, 3).strftime(settings.TIMESTAMP_FILE_FORMAT)
+
+    assert expected == result

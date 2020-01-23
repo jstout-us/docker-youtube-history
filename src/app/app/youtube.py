@@ -1,18 +1,61 @@
 # -*- coding: utf-8 -*-
 
 """Module app.youtube."""
+import os
 from urllib.parse import urlparse
 
+import googleapiclient.discovery
 from bs4 import BeautifulSoup
 from bs4 import SoupStrainer
 from dateutil import parser
 from dateutil import tz
+from google.auth.transport import requests
+
+from .exceptions import EmptyResponseError
 
 MONTHS_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 TIMEZONES = {
     'EDT': 'US/Eastern',
     'EST': 'US/Eastern'
     }
+
+
+def _get_youtube(token, kind, id_):
+    """Retreive record from Youtube via API.
+
+    Args:
+        token(Token):       Valid youtube auth token
+        kind(str):          Type of record to retreive (channel, video)
+        id_(str):           Record id field
+
+    Raises:
+        KeyError:           unknown type
+
+    Returns:
+        response(dict):     Youtube API response
+    """
+    os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
+    api_service_name = "youtube"
+    api_version = "v3"
+
+    api = googleapiclient.discovery.build(
+        api_service_name, api_version, credentials=token)
+
+    if kind == 'channel':
+        part = "id,contentDetails,contentOwnerDetails,statistics,topicDetails,status,snippet"
+        request = api.channels().list(part=part, id=id_)   # pylint: disable=no-member
+
+    elif kind == 'video':
+        part = "contentDetails,id,localizations,recordingDetails,snippet"
+        part += ",statistics,status,topicDetails"
+        request = api.videos().list(part=part, id=id_)   # pylint: disable=no-member
+
+    else:
+        raise KeyError
+
+    response = request.execute()
+
+    return response
 
 
 def _parse_url_tag(tag):
@@ -39,6 +82,28 @@ def _parse_watched(text):
     watched = parser.parse(text[idx_left:idx_right]).replace(tzinfo=tz.gettz(tz_))
 
     return watched.astimezone(tz.UTC).isoformat().replace('+00:00', 'Z')
+
+
+def get(token, kind, id_):
+    """Retreive record from Youtube via API.
+
+    Args:
+        token(Token):       Valid youtube auth token
+        kind(str):          Type of record to retreive (channel, video)
+        id_(str):           Record id field
+
+    Raises:
+        EmptyResponseError: No records returned from Youtube API
+
+    Returns:
+        response(dict):     Youtube API response
+    """
+    result = _get_youtube(token, kind, id_)
+
+    if not result['pageInfo']['totalResults']:
+        raise EmptyResponseError
+
+    return result
 
 
 def parse_history(path):
@@ -73,3 +138,18 @@ def parse_history(path):
             videos.append(data)
 
     return videos
+
+
+def refresh_token(token):
+    """Check token status and refresh if required.
+
+    Args:
+        token(Token):   Google auth token
+
+    Returns
+        token(Token):   Refreshed google token
+    """
+    if token.expired and token.refresh_token:
+        token.refresh(requests.Request())
+
+    return token

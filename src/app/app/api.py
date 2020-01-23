@@ -1,11 +1,18 @@
 # -*- coding: utf-8 -*-
 
 """Module app.api."""
+import collections
+import time
 from pathlib import Path
+from datetime import datetime
+
+from googleapiclient.errors import HttpError
+from httplib2 import ServerNotFoundError
 
 from . import task_queue
 from . import util
 from . import youtube
+from .exceptions import EmptyResponseError
 from .exceptions import NotAuthenticatedError
 from .settings import config
 
@@ -25,6 +32,51 @@ def load_tasks():
         task_queue.save(config['file_task_queue'], *tasks)
 
     return tasks
+
+
+def run(tasks):
+    """Run tasks.
+
+    Args:
+        tasks(list):    Task objects
+
+    Returns:
+        None
+    """
+    queue = collections.deque(tasks)
+
+    while queue:
+        time_start = datetime.now()
+        task = queue.pop().copy()
+        task['retry'] -= 1
+
+        try:
+            token = util.load_file(config['file_token'])
+            token = youtube.refresh_token(token)
+            util.save_file(config['file_token'], token)
+
+            result = youtube.get(token, task['kind'], task['id'])
+            task['state'] = 'ok'
+
+            file_name = '{}_result.json'.format(util.get_file_timestamp())
+            util.save_file(config['dir_work_data'] / file_name, result)
+
+        except (EmptyResponseError, HttpError, NotAuthenticatedError, ServerNotFoundError):
+            if task['retry']:
+                task['state'] = 'error'
+                queue.appendleft(task)
+
+            else:
+                task['state'] = 'failed'
+
+        except Exception:   # pylint: disable=broad-except
+            pass
+
+        finally:
+            task_queue.save(config['file_task_queue'], task)
+
+        time_sleep = util.get_sleep_time(time_start, datetime.now(), config['api_poll_int'])
+        time.sleep(time_sleep)
 
 
 def setup(**kwargs):

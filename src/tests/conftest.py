@@ -1,4 +1,16 @@
+import json
+from collections import namedtuple
+from pathlib import Path
+
 import pytest
+
+Token = namedtuple('Token', ['expired', 'refresh_token'])
+
+
+@pytest.fixture
+def fix_auth_token():
+    return Token(False, False)
+
 
 @pytest.fixture
 def fix_task_list():
@@ -89,5 +101,21 @@ def fix_video_list():
             'watched': '1970-05-01T12:00:00Z'
             },
         ]
+
+    return fixture
+
+
+@pytest.fixture
+def fix_yt_empty_resp():
+    with Path('src/tests/_fixtures/files/youtube_empty_response.json').open() as fd_in:
+        fixture = json.load(fd_in)
+
+    return fixture
+
+
+@pytest.fixture
+def fix_yt_valid_resp():
+    with Path('src/tests/_fixtures/files/youtube_valid_response.json').open() as fd_in:
+        fixture = json.load(fd_in)
 
     return fixture

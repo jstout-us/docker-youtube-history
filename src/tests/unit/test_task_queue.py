@@ -39,12 +39,15 @@ def test_load(tmp_path, fix_task_list):
 def test_save(tmp_path, fix_task_list):
     queue_file = tmp_path / 'task.queue'
 
-    task_queue.save(queue_file, *fix_task_list[:2])
+    with patch('app.util.get_timestamp_utc') as mock_f:
+        mock_f.return_value = '1970-01-01T00:00:00Z'
 
-    result = []
+        task_queue.save(queue_file, *fix_task_list[:2])
 
-    with queue_file.open() as fd_in:
-        for line in fd_in:
-            result.append(json.loads(line))
+        result = []
 
-    assert fix_task_list[:2] == result
+        with queue_file.open() as fd_in:
+            for line in fd_in:
+                result.append(json.loads(line))
+
+        assert fix_task_list[:2] == result

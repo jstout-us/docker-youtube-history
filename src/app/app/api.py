@@ -21,6 +21,7 @@ from .settings import config
 
 
 def export():
+    """Archive run results to /out directory."""
     base_name = '{}/{}_youtube_import'.format(config['dir_out'], util.get_file_timestamp())
 
     with tempfile.TemporaryDirectory() as tmp_dir:

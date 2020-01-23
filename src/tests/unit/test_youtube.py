@@ -2,7 +2,6 @@
 
 """Test module doc string."""
 import json
-from pathlib import Path
 from unittest.mock import patch
 from unittest.mock import MagicMock
 
@@ -12,25 +11,9 @@ from app import youtube
 from app.exceptions import EmptyResponseError
 
 
-@pytest.fixture
-def fix_empty_resp():
-    with Path('src/tests/_fixtures/files/youtube_empty_response.json').open() as fd_in:
-        fixture = json.load(fd_in)
-
-    return fixture
-
-
-@pytest.fixture
-def fix_valid_resp():
-    with Path('src/tests/_fixtures/files/youtube_valid_response.json').open() as fd_in:
-        fixture = json.load(fd_in)
-
-    return fixture
-
-
-def test_get(fix_auth_token, fix_empty_resp, fix_valid_resp):
+def test_get(fix_auth_token, fix_yt_empty_resp, fix_yt_valid_resp):
     with patch('app.youtube._get_youtube') as mock_get_yt:
-        mock_get_yt.side_effect = [fix_valid_resp, fix_empty_resp]
+        mock_get_yt.side_effect = [fix_yt_valid_resp, fix_yt_empty_resp]
 
         assert youtube.get('token', 'type', 'id')
 

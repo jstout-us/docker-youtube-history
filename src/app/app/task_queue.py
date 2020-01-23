@@ -74,4 +74,6 @@ def save(path, *tasks):
     """
     with path.open('a') as fd_out:
         for task in tasks:
-            fd_out.write('{}\n'.format(json.dumps(task)))
+            task_ = task.copy()
+            task_['timestamp'] = util.get_timestamp_utc()
+            fd_out.write('{}\n'.format(json.dumps(task_)))

@@ -12,6 +12,7 @@ from googleapiclient.errors import HttpError
 from . import task_queue
 from . import util
 from . import youtube
+from .exceptions import EmptyResponseError
 from .exceptions import NotAuthenticatedError
 from .settings import config
 
@@ -46,7 +47,7 @@ def run(tasks):
 
     while queue:
         time_start = datetime.now()
-        task = queue.pop()
+        task = queue.pop().copy()
         task['retry'] -= 1
 
         try:
@@ -54,24 +55,23 @@ def run(tasks):
             token = youtube.refresh_token(token)
             util.save_file(config['file_token'], token)
 
-            # result = youtube.get(token, task['kind'], task['id'])
-            task['status'] = 'ok'
+            result = youtube.get(token, task['kind'], task['id'])
+            task['state'] = 'ok'
 
             # util.save_file(config['file_token'] / 'result.json',
             #                result,
             #                prefix=util.get_filename_prefix
             #                )
 
-        except (NotAuthenticatedError, ServerNotFoundError, HttpError):
+        except (EmptyResponseError, HttpError, NotAuthenticatedError, ServerNotFoundError):
             if task['retry']:
-                task['status'] = 'error'
+                task['state'] = 'error'
                 queue.appendleft(task)
 
             else:
-                task['status'] = 'failed'
+                task['state'] = 'failed'
 
         except Exception as exp:
-            print('exception: {}'.format(exp))
             pass
 
         finally:

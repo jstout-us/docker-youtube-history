@@ -8,6 +8,7 @@ from unittest.mock import patch
 
 import pytest
 
+import app
 from app import api
 from app import settings
 from app.exceptions import NotAuthenticatedError
@@ -23,9 +24,9 @@ def fix_run_tasks(fix_task_list, fix_timestamp):
     tasks = [x.copy() for x in fix_task_list[-3:]]
 
     updates = [
-        {'state': 'error', 'retry': 1},
-        {'state': 'error', 'retry': 4},
         {},
+        {'state': 'error', 'retry': 4},
+        {'state': 'error', 'retry': 1},
         ]
 
     for task, update in zip(tasks, updates):
@@ -77,9 +78,23 @@ def test_load_tasks(tmp_path, fix_task_list):
             assert queue_stat == config['file_task_queue'].stat()
 
 
-def test_run(tmp_path, fix_run_tasks, fix_run_results, fix_timestamp, fix_auth_token):
+@patch('app.youtube._get_youtube')
+@patch('app.util.get_timestamp_utc')
+def test_run(ts_mock, yt_mock, tmp_path, fix_run_tasks, fix_run_results, fix_auth_token,
+             fix_yt_empty_resp, fix_yt_valid_resp):
+    assert yt_mock is app.youtube._get_youtube
+    assert ts_mock is app.util.get_timestamp_utc
+
+    ts_mock.return_value = '1980-01-01T00:00:00Z'
+    yt_mock.side_effect = [fix_yt_empty_resp, fix_yt_empty_resp, fix_yt_valid_resp,
+                           fix_yt_valid_resp]
+
+    dir_work_data = tmp_path / 'data'
+    dir_work_data.mkdir()
+
     config = {
         'api_poll_int': 0,
+        'dir_work_data': dir_work_data,
         'file_task_queue': tmp_path / 'task.queue',
         'file_token': tmp_path / 'token.pkl'
         }
@@ -88,17 +103,17 @@ def test_run(tmp_path, fix_run_tasks, fix_run_results, fix_timestamp, fix_auth_t
         pickle.dump(fix_auth_token, fd_out)
 
     with patch.dict(settings.config, config):
-        with patch('app.util.get_timestamp_utc') as mock_f:
-            mock_f.return_value = fix_timestamp
+        api.run(fix_run_tasks)
 
-            api.run(fix_run_tasks)
+        results = []
+        with config['file_task_queue'].open() as fd_in:
+            for line in fd_in:
+                results.append(json.loads(line))
 
-            results = []
-            with config['file_task_queue'].open() as fd_in:
-                for line in fd_in:
-                    results.append(json.loads(line))
 
-            assert fix_run_results == results
+        assert fix_run_results == results
+        assert (config['dir_work_data'] / '19800101_000000_result.json').is_file()
+        assert (config['dir_work_data'] / '19800101_010000_result.json').is_file()
 
 
 def test_setup(tmp_path):

@@ -44,6 +44,15 @@ EXTENSIONS = {
     }
 
 
+def get_file_timestamp():
+    """Return formated file name utc timestamp.
+
+    Returns
+        timestamp(str)
+    """
+    return datetime.utcnow().strftime(settings.TIMESTAMP_FILE_FORMAT)
+
+
 def get_sleep_time(time_start, time_now, poll_int):
     """Calculate time to sleep.
 

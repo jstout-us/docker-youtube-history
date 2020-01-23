@@ -58,10 +58,8 @@ def run(tasks):
             result = youtube.get(token, task['kind'], task['id'])
             task['state'] = 'ok'
 
-            # util.save_file(config['file_token'] / 'result.json',
-            #                result,
-            #                prefix=util.get_filename_prefix
-            #                )
+            file_name = '{}_result.json'.format(util.get_file_timestamp())
+            util.save_file(config['dir_work_data'] / file_name, result)
 
         except (EmptyResponseError, HttpError, NotAuthenticatedError, ServerNotFoundError):
             if task['retry']:

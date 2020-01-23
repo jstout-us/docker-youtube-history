@@ -80,11 +80,13 @@ def test_load_tasks(tmp_path, fix_task_list):
 
 @patch('app.youtube._get_youtube')
 @patch('app.util.get_timestamp_utc')
-def test_run(ts_mock, yt_mock, tmp_path, fix_run_tasks, fix_run_results, fix_auth_token,
+@patch('app.util.get_file_timestamp')
+def test_run(fs_mock, ts_mock, yt_mock, tmp_path, fix_run_tasks, fix_run_results, fix_auth_token,
              fix_yt_empty_resp, fix_yt_valid_resp):
     assert yt_mock is app.youtube._get_youtube
     assert ts_mock is app.util.get_timestamp_utc
 
+    fs_mock.side_effect = ['19800101_000000', '19800101_010000']
     ts_mock.return_value = '1980-01-01T00:00:00Z'
     yt_mock.side_effect = [fix_yt_empty_resp, fix_yt_empty_resp, fix_yt_valid_resp,
                            fix_yt_valid_resp]

@@ -24,7 +24,7 @@ from .settings import LOG_FILE_TIME_FORMAT
 from .settings import LOG_STREAM_MSG_FORMAT
 from .settings import LOG_STREAM_TIME_FORMAT
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)    # pylint: disable=invalid-name
 
 
 def export():
@@ -109,7 +109,7 @@ def run(tasks):
         finally:
             task_remain = len(queue)
             logger.info(msg, task['state'].upper(), task_remain,
-                     util.get_time_remaining(task_remain, config['api_poll_int']))
+                        util.get_time_remaining(task_remain, config['api_poll_int']))
 
             task_queue.save(config['file_task_queue'], task)
 
@@ -160,15 +160,16 @@ def setup(**kwargs):
         )
 
     logging.getLogger()
-    ch = logging.StreamHandler()
-    ch.setLevel(logging.INFO)
-    ch.setFormatter(
+    handler = logging.StreamHandler()
+    handler.setLevel(logging.INFO)
+    handler.setFormatter(
         logging.Formatter(LOG_STREAM_MSG_FORMAT, datefmt=LOG_STREAM_TIME_FORMAT)
         )
-    logger.addHandler(ch)
+    logger.addHandler(handler)
 
     logger.info('Setup complete')
     logger.debug('setup() - exit')
+
 
 def test_auth():
     """Load token file to verify authecation status.

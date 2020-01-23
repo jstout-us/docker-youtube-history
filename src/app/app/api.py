@@ -2,6 +2,9 @@
 
 """Module app.api."""
 import collections
+import os
+import tempfile
+import shutil
 import time
 from pathlib import Path
 from datetime import datetime
@@ -15,6 +18,16 @@ from . import youtube
 from .exceptions import EmptyResponseError
 from .exceptions import NotAuthenticatedError
 from .settings import config
+
+
+def export():
+    base_name = '{}/{}_youtube_import'.format(config['dir_out'], util.get_file_timestamp())
+
+    with tempfile.TemporaryDirectory() as tmp_dir:
+        dir_stage = tmp_dir + '/work'
+        shutil.copytree(str(config['dir_work']), dir_stage)
+        os.unlink(tmp_dir + '/work/var/token.pkl')
+        shutil.make_archive(base_name, 'zip', tmp_dir)
 
 
 def load_tasks():

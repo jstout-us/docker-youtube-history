@@ -1,10 +1,47 @@
 # -*- coding: utf-8 -*-
 
 """Module app.util."""
+import json
 import pickle
 from datetime import datetime
 
 from . import settings
+
+
+def _load_json(path):
+    with path.open() as fd_in:
+        data = json.load(fd_in)
+
+    return data
+
+
+def _load_pickle(path):
+    with path.open('rb') as fd_in:
+        data = pickle.load(fd_in)
+
+    return data
+
+
+def _save_json(path, data):
+    with path.open('w') as fd_out:
+        json.dump(data, fd_out)
+
+
+def _save_pickle(path, data):
+    with path.open('wb') as fd_out:
+        pickle.dump(data, fd_out)
+
+
+EXTENSIONS = {
+    '.json': {
+        'r': _load_json,
+        'w': _save_json
+        },
+    '.pkl': {
+        'r': _load_pickle,
+        'w': _save_pickle
+        }
+    }
 
 
 def get_sleep_time(time_start, time_now, poll_int):
@@ -44,10 +81,7 @@ def load_file(path):
     Returns:
         file contents
     """
-    with path.open('rb') as fd_in:
-        data = pickle.load(fd_in)
-
-    return data
+    return EXTENSIONS[path.suffix]['r'](path)
 
 
 def save_file(path, data):
@@ -60,5 +94,4 @@ def save_file(path, data):
     Returns:
         None
     """
-    with path.open('wb') as fd_out:
-        pickle.dump(data, fd_out)
+    return EXTENSIONS[path.suffix]['w'](path, data)

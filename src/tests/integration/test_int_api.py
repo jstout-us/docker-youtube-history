@@ -180,7 +180,7 @@ def test_setup(tmp_path):
         'dir_work_var': dir_work_var,
         'file_token': dir_work_var / 'token.pkl',
         'file_history': dir_in / 'watch-history.html',
-        'file_log': dir_work / 'run.log',
+        'file_log': dir_work_var / 'run.log',
         'file_task_queue': dir_work_var / 'task.queue'
         }
 

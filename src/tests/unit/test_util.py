@@ -33,6 +33,25 @@ def test_get_sleep_time():
     assert expected == result
 
 
+def test_get_time_remaining():
+    poll_int = 120
+
+    expected = '2 days, 12:06'
+    len_task = 1803
+    result = util.get_time_remaining(len_task, poll_int)
+    assert expected == result
+
+    expected = '1 day, 12:06'
+    len_task = 1083
+    result = util.get_time_remaining(len_task, poll_int)
+    assert expected == result
+
+    expected = '12:06'
+    len_task = 363
+    result = util.get_time_remaining(len_task, poll_int)
+    assert expected == result
+
+
 def test_load_pickle_file(tmp_path, exp_data):
     file_path = tmp_path / 'test.pkl'
 

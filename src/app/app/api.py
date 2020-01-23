@@ -3,11 +3,11 @@
 """Module app.api."""
 import collections
 import time
-from datetime import datetime
-from httplib2 import ServerNotFoundError
 from pathlib import Path
+from datetime import datetime
 
 from googleapiclient.errors import HttpError
+from httplib2 import ServerNotFoundError
 
 from . import task_queue
 from . import util
@@ -69,7 +69,7 @@ def run(tasks):
             else:
                 task['state'] = 'failed'
 
-        except Exception as exp:
+        except Exception:   # pylint: disable=broad-except
             pass
 
         finally:

@@ -48,7 +48,7 @@ def _get_youtube(token, kind, id_):
     elif kind == 'video':
         part = "contentDetails,id,localizations,recordingDetails,snippet"
         part += ",statistics,status,topicDetails"
-        request = api.videos().list(part=part,id=id_)   # pylint: disable=no-member
+        request = api.videos().list(part=part, id=id_)   # pylint: disable=no-member
 
     else:
         raise KeyError
@@ -138,6 +138,7 @@ def parse_history(path):
             videos.append(data)
 
     return videos
+
 
 def refresh_token(token):
     """Check token status and refresh if required.

@@ -94,7 +94,7 @@ def load_file(path):
 
 
 def save_file(path, data):
-    """Serialize data and write to disk,
+    """Serialize data and write to disk.
 
     Args:
         path(Path): Path to output file

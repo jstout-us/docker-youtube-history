@@ -3,7 +3,9 @@
 """Module app.util."""
 import json
 import pickle
+import time
 from datetime import datetime
+from datetime import timedelta
 
 from . import settings
 
@@ -79,6 +81,31 @@ def get_timestamp_utc():
         timestamp(str)
     """
     return datetime.utcnow().strftime(settings.TIMESTAMP_ISO_FORMAT)
+
+
+def get_time_remaining(task_cnt, poll_int):
+    """Calculate time remaining.
+
+    Args:
+        task_cnt(int):  Total task remaining
+        poll_int(int):  API Poll interval
+
+    Returns:
+        str:            Formated time remaining
+    """
+    delta = timedelta(seconds=task_cnt*poll_int)
+
+    days_str = ''
+    if delta.days > 1:
+        days_str = '{} days, '.format(delta.days)
+
+    elif delta.days == 1:
+        days_str = '{} day, '.format(delta.days)
+
+    time_str = time.strftime('%H:%M', time.gmtime(delta.seconds))
+    # time_str = time.gmtime(delta.seconds).strftime('%H:%M')
+
+    return ''.join([days_str, time_str])
 
 
 def load_file(path):

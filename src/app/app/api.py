@@ -2,6 +2,7 @@
 
 """Module app.api."""
 import collections
+import logging
 import os
 import tempfile
 import shutil
@@ -18,10 +19,17 @@ from . import youtube
 from .exceptions import EmptyResponseError
 from .exceptions import NotAuthenticatedError
 from .settings import config
+from .settings import LOG_FILE_MSG_FORMAT
+from .settings import LOG_FILE_TIME_FORMAT
+from .settings import LOG_STREAM_MSG_FORMAT
+from .settings import LOG_STREAM_TIME_FORMAT
+
+logger = logging.getLogger(__name__)    # pylint: disable=invalid-name
 
 
 def export():
     """Archive run results to /out directory."""
+    logger.debug('export() - enter')
     base_name = '{}/{}_youtube_import'.format(config['dir_out'], util.get_file_timestamp())
 
     with tempfile.TemporaryDirectory() as tmp_dir:
@@ -30,6 +38,8 @@ def export():
         os.unlink(tmp_dir + '/work/var/token.pkl')
         shutil.make_archive(base_name, 'zip', tmp_dir)
 
+    logger.debug('export() - exit')
+
 
 def load_tasks():
     """Load tasks from task queue or generated from watched-history.html.
@@ -37,13 +47,20 @@ def load_tasks():
     Returns:
         tasks(list):    List of task dictionaries
     """
+    logger.debug('load_tasks() - enter')
+
     try:
         tasks = task_queue.load(config['file_task_queue'])
+        logger.info('Found existing task.queue file. Loading cached tasks')
 
     except FileNotFoundError:
+        logger.info('Task.queue file not found, parsing watch=history.html')
         videos = youtube.parse_history(config['file_history'])
         tasks = task_queue.create_tasks(videos)
         task_queue.save(config['file_task_queue'], *tasks)
+
+    logger.info('Loaded %s tasks', len(tasks))
+    logger.debug('load_tasks() - exit')
 
     return tasks
 
@@ -57,6 +74,8 @@ def run(tasks):
     Returns:
         None
     """
+    logger.debug('run() - enter')
+    msg = 'YT Get - Result: %s Tasks Remaining: %s Time Remaining: %s'
     queue = collections.deque(tasks)
 
     while queue:
@@ -83,14 +102,21 @@ def run(tasks):
             else:
                 task['state'] = 'failed'
 
-        except Exception:   # pylint: disable=broad-except
-            pass
+        except Exception as exp:   # pylint: disable=broad-except
+            task['state'] = 'error'
+            logger.critical(exp, exc_info=True)
 
         finally:
+            task_remain = len(queue)
+            logger.info(msg, task['state'].upper(), task_remain,
+                        util.get_time_remaining(task_remain, config['api_poll_int']))
+
             task_queue.save(config['file_task_queue'], task)
 
         time_sleep = util.get_sleep_time(time_start, datetime.now(), config['api_poll_int'])
         time.sleep(time_sleep)
+
+    logger.debug('run() - exit')
 
 
 def setup(**kwargs):
@@ -116,7 +142,7 @@ def setup(**kwargs):
         'dir_work_var': dir_work_var,
         'file_token': dir_work_var / 'token.pkl',
         'file_history': dir_in / 'watch-history.html',
-        'file_log': dir_work / 'run.log',
+        'file_log': dir_work_var / 'run.log',
         'file_task_queue': dir_work_var / 'task.queue'
         }
 
@@ -124,6 +150,25 @@ def setup(**kwargs):
     cfg_update['dir_work_var'].mkdir(parents=True, exist_ok=True)
 
     config.update(cfg_update)
+
+    logging.basicConfig(
+        filename=config['file_log'],
+        filemode='w',
+        level=logging.DEBUG,
+        format=LOG_FILE_MSG_FORMAT,
+        datefmt=LOG_FILE_TIME_FORMAT
+        )
+
+    logging.getLogger()
+    handler = logging.StreamHandler()
+    handler.setLevel(logging.INFO)
+    handler.setFormatter(
+        logging.Formatter(LOG_STREAM_MSG_FORMAT, datefmt=LOG_STREAM_TIME_FORMAT)
+        )
+    logger.addHandler(handler)
+
+    logger.info('Setup complete')
+    logger.debug('setup() - exit')
 
 
 def test_auth():

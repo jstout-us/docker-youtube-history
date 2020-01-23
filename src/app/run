@@ -35,5 +35,4 @@ if __name__ == '__main__':
 
     finally:
         if export_on_exit:
-            # api.export()
-            pass
+            api.export()

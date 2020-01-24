@@ -39,7 +39,7 @@ def _get_youtube(token, kind, id_):
     api_version = "v3"
 
     api = googleapiclient.discovery.build(
-        api_service_name, api_version, credentials=token)
+        api_service_name, api_version, cache_discovery=False, credentials=token)
 
     if kind == 'channel':
         part = "id,contentDetails,contentOwnerDetails,statistics,topicDetails,status,snippet"

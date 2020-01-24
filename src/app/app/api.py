@@ -146,12 +146,22 @@ def setup(**kwargs):
         'file_task_queue': dir_work_var / 'task.queue'
         }
 
-    cfg_update['dir_work_data'].mkdir(parents=True, exist_ok=True)
     cfg_update['dir_work_var'].mkdir(parents=True, exist_ok=True)
+
+    try:
+        cfg_update['dir_work_data'].mkdir(parents=True)
+
+    except FileExistsError:
+        for path in [x for x in cfg_update['dir_work_data'].glob('*')]:
+            path.unlink()
 
     config.update(cfg_update)
 
-    shutil.copy(str(config['dir_in'] / 'token.pkl'), str(config['file_token']))
+    try:
+        shutil.copy(str(config['dir_in'] / 'token.pkl'), str(config['file_token']))
+
+    except FileNotFoundError:
+        pass
 
     logging.basicConfig(
         filename=config['file_log'],

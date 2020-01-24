@@ -54,7 +54,7 @@ def load_tasks():
         logger.info('Found existing task.queue file. Loading cached tasks')
 
     except FileNotFoundError:
-        logger.info('Task.queue file not found, parsing watch=history.html')
+        logger.info('Task.queue file not found, parsing watch-history.html')
         videos = youtube.parse_history(config['file_history'])
         tasks = task_queue.create_tasks(videos)
         task_queue.save(config['file_task_queue'], *tasks)
@@ -150,6 +150,8 @@ def setup(**kwargs):
     cfg_update['dir_work_var'].mkdir(parents=True, exist_ok=True)
 
     config.update(cfg_update)
+
+    shutil.copy(str(config['dir_in'] / 'token.pkl'), str(config['file_token']))
 
     logging.basicConfig(
         filename=config['file_log'],

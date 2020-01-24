@@ -26,7 +26,7 @@ def _load_pickle(path):
 
 def _save_json(path, data):
     with path.open('w') as fd_out:
-        json.dump(data, fd_out)
+        json.dump(data, fd_out, indent=4, sort_keys=True)
 
 
 def _save_pickle(path, data):

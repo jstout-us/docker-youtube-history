@@ -35,7 +35,7 @@ Run App on Digital Ocean:
 
 DO_TOKEN="<token>"
 APP_NAME="youtube-history"
-MACHINE_NAME=APP_NAME
+MACHINE_NAME=$APP_NAME
 IMAGE_NAME="ubuntu-18-04-x64"
 
 
@@ -47,8 +47,8 @@ $ docker-machine create \
                  --digitalocean-image $IMAGE_NAME \
                  $MACHINE_NAME
 
-$ docker-machine ssh $MACHINE_NAME mkdir -p /data/{in,out,work}
-$ docker-machine scp stage/in/* $MACHINE_NAME:/data/in
+$ docker-machine ssh $MACHINE_NAME mkdir -p /data/{out,work}
+$ docker-machine scp -r stage/in/ $MACHINE_NAME:/data/in
 
 
 Run Job:

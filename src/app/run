@@ -28,6 +28,7 @@ if __name__ == '__main__':
 
     except NotAuthenticatedError:
         export_on_exit = False
+        print('Application not authenticated')
         sys.exit(1)
 
     except Exception:

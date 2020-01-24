@@ -94,7 +94,9 @@ def run(tasks):
             file_name = '{}_result.json'.format(util.get_file_timestamp())
             util.save_file(config['dir_work_data'] / file_name, result)
 
-        except (EmptyResponseError, HttpError, NotAuthenticatedError, ServerNotFoundError):
+        except (EmptyResponseError, HttpError, NotAuthenticatedError, ServerNotFoundError) as exp:
+            logger.warn(exp)
+
             if task['retry']:
                 task['state'] = 'error'
                 queue.appendleft(task)

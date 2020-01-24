@@ -1,0 +1,85 @@
+Deploy and Run Application
+===================================================================================================
+
+Secrets management
+===============================================================================
+
+$HOME/.config/dev/secrets/
+
+    *   digitalocean/
+        *   api_token
+
+    *   youtube/
+        *   token.pkl
+        *   client_secrets.json         # needed to get token
+        *   watch-history.html          # test fixture (for now)
+
+
+Copy Secrets to Vagrant:
+===========================================================
+
+$ mkdir -p $DEV_ROOT/docker-youtube-history/stage/{in,out,work}
+$ cp $DEV_CFG_ROOT/secrets/youtube/* $DEV_ROOT/docker-youtube-history/stage/in
+
+
+Run App in Local VM:
+===============================================================================
+
+$ docker build -t youtube-history src
+$ clear
+$ docker run -it --mount type=bind,src=/vagrant/stage,dst=/data youtube-history
+
+
+Run App on Digital Ocean:
+===============================================================================
+
+DO_TOKEN="<token>"
+APP_NAME="youtube-history"
+MACHINE_NAME=APP_NAME
+IMAGE_NAME="ubuntu-18-04-x64"
+
+
+Bootstrap DO Host:
+===============================================================================
+$ docker-machine create \
+                 --driver digitalocean \
+                 --digitalocean-access-token $DO_TOKEN \
+                 --digitalocean-image $IMAGE_NAME \
+                 $MACHINE_NAME
+
+$ docker-machine ssh $MACHINE_NAME mkdir -p /data/{in,out,work}
+$ docker-machine scp stage/in/* $MACHINE_NAME:/data/in
+
+
+Run Job:
+===============================================================================
+
+$ eval $(docker-machine env $MACHINE_NAME)
+$ docker-machine ls
+
+$ docker build -t $APP_NAME src
+
+$ docker run --detach \
+    --mount type=bind,src=/data,dst=/data \
+    $APP_NAME
+
+$ docker logs -f <container id>
+
+
+Get results and destroy machine:
+===============================================================================
+$ docker-machine scp $MACHINE_NAME:/data/out/* stage/out
+$ docker-machine rm --force $MACHINE_NAME
+$ eval "$(docker-machine env -u)"
+
+
+Reconnect After Konsole Crash:
+===============================================================================
+
+# close window and reconnect to VM via standard process
+
+MACHINE_NAME="youtube-history"
+CONTAINER_ID="<id>"
+
+$ eval $(docker-machine env $MACHINE_NAME)
+$ docker logs -f $CONTAINER_ID

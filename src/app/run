@@ -1,0 +1,39 @@
+#!/usr/local/bin/python3
+import signal
+import sys
+
+from app import api
+from app.exceptions import NotAuthenticatedError
+
+
+def terminateProcess(signalNumber, frame):
+    sys.exit()
+
+
+if __name__ == '__main__':
+    signal.signal(signal.SIGTERM, terminateProcess)
+    export_on_exit = True
+
+    try:
+        api.setup()
+        api.test_auth()
+
+        tasks = api.load_tasks()
+        api.run(tasks)
+
+        sys.exit()
+
+    except KeyboardInterrupt:
+        sys.exit()
+
+    except NotAuthenticatedError:
+        export_on_exit = False
+        print('Application not authenticated')
+        sys.exit(1)
+
+    except Exception:
+        sys.exit(1)
+
+    finally:
+        if export_on_exit:
+            api.export()

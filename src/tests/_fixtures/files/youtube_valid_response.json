@@ -1,0 +1,109 @@
+{
+    "etag": "\"p4VTdlkQv3HQeTEaXgvLePAydmU/O8PTf7ERxrKq76x48kFd_vfVKKE\"",
+    "items": [
+        {
+            "contentDetails": {
+                "caption": "false",
+                "definition": "hd",
+                "dimension": "2d",
+                "duration": "PT14M29S",
+                "licensedContent": true,
+                "projection": "rectangular"
+            },
+            "etag": "\"p4VTdlkQv3HQeTEaXgvLePAydmU/3pKbZsV5oYdWNOxwuB5QODz2H7Q\"",
+            "id": "rXAmnoMR2aI",
+            "kind": "youtube#video",
+            "snippet": {
+                "categoryId": "27",
+                "channelId": "UCrfKGpvbEQXcbe68dzXgJuA",
+                "channelTitle": "Forgotten Weapons",
+                "description": "http://www.Patreon.com/ForgottenWeapons\n\nHammer price: $25,000\n\nOne of the competitors against the Garand and Pedersen rifles in the 1929 and 1930 US Army trials was the White rifle. White actually submitted two rifles, but only this gas-operated design was actually tested - and it failed to make enough of an impression to move on for further testing. However, White's gas system would come back 20 years later to be used in the M14 rifle.",
+                "liveBroadcastContent": "none",
+                "localized": {
+                    "description": "http://www.Patreon.com/ForgottenWeapons\n\nHammer price: $25,000\n\nOne of the competitors against the Garand and Pedersen rifles in the 1929 and 1930 US Army trials was the White rifle. White actually submitted two rifles, but only this gas-operated design was actually tested - and it failed to make enough of an impression to move on for further testing. However, White's gas system would come back 20 years later to be used in the M14 rifle.",
+                    "title": "White Prototype Gas Operated .276 Rifle"
+                },
+                "publishedAt": "2015-11-12T13:00:03.000Z",
+                "tags": [
+                    "Gas-operated Reloading",
+                    "Rifle",
+                    "RIA",
+                    "Rock Island",
+                    "auction",
+                    "White",
+                    "Pedersen Garand",
+                    "M1",
+                    "toggle",
+                    "UK",
+                    "Britain",
+                    "trials",
+                    "test",
+                    "testing",
+                    "military",
+                    "1929",
+                    "1930",
+                    "276",
+                    "caliber",
+                    "prototype",
+                    "experimental",
+                    "carbine",
+                    "semiauto",
+                    "self loading",
+                    "M14",
+                    "cutoff"
+                ],
+                "thumbnails": {
+                    "default": {
+                        "height": 90,
+                        "url": "https://i.ytimg.com/vi/rXAmnoMR2aI/default.jpg",
+                        "width": 120
+                    },
+                    "high": {
+                        "height": 360,
+                        "url": "https://i.ytimg.com/vi/rXAmnoMR2aI/hqdefault.jpg",
+                        "width": 480
+                    },
+                    "medium": {
+                        "height": 180,
+                        "url": "https://i.ytimg.com/vi/rXAmnoMR2aI/mqdefault.jpg",
+                        "width": 320
+                    },
+                    "standard": {
+                        "height": 480,
+                        "url": "https://i.ytimg.com/vi/rXAmnoMR2aI/sddefault.jpg",
+                        "width": 640
+                    }
+                },
+                "title": "White Prototype Gas Operated .276 Rifle"
+            },
+            "statistics": {
+                "commentCount": "172",
+                "dislikeCount": "16",
+                "favoriteCount": "0",
+                "likeCount": "3000",
+                "viewCount": "131343"
+            },
+            "status": {
+                "embeddable": true,
+                "license": "youtube",
+                "privacyStatus": "public",
+                "publicStatsViewable": true,
+                "uploadStatus": "processed"
+            },
+            "topicDetails": {
+                "relevantTopicIds": [
+                    "/m/019_rr",
+                    "/m/019_rr"
+                ],
+                "topicCategories": [
+                    "https://en.wikipedia.org/wiki/Lifestyle_(sociology)"
+                ]
+            }
+        }
+    ],
+    "kind": "youtube#videoListResponse",
+    "pageInfo": {
+        "resultsPerPage": 1,
+        "totalResults": 1
+    }
+}

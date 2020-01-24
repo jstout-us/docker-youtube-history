@@ -190,6 +190,13 @@ def test_setup(tmp_path):
     assert expected_config['dir_work_data'].is_dir()
     assert expected_config['dir_work_var'].is_dir()
 
+    data_file = expected_config['dir_work_data'] / 'test_file'
+    with data_file.open('w') as fd_out:
+        fd_out.write('')
+
+    api.setup(dir=dir_root)
+    assert not data_file.is_file()
+
 
 def test_test_auth(tmp_path):
     file_token = tmp_path / 'token.pkl'

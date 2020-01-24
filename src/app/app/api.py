@@ -54,7 +54,7 @@ def load_tasks():
         logger.info('Found existing task.queue file. Loading cached tasks')
 
     except FileNotFoundError:
-        logger.info('Task.queue file not found, parsing watch=history.html')
+        logger.info('Task.queue file not found, parsing watch-history.html')
         videos = youtube.parse_history(config['file_history'])
         tasks = task_queue.create_tasks(videos)
         task_queue.save(config['file_task_queue'], *tasks)
@@ -94,7 +94,9 @@ def run(tasks):
             file_name = '{}_result.json'.format(util.get_file_timestamp())
             util.save_file(config['dir_work_data'] / file_name, result)
 
-        except (EmptyResponseError, HttpError, NotAuthenticatedError, ServerNotFoundError):
+        except (EmptyResponseError, HttpError, NotAuthenticatedError, ServerNotFoundError) as exp:
+            logger.warn(exp)
+
             if task['retry']:
                 task['state'] = 'error'
                 queue.appendleft(task)
@@ -146,10 +148,22 @@ def setup(**kwargs):
         'file_task_queue': dir_work_var / 'task.queue'
         }
 
-    cfg_update['dir_work_data'].mkdir(parents=True, exist_ok=True)
     cfg_update['dir_work_var'].mkdir(parents=True, exist_ok=True)
 
+    try:
+        cfg_update['dir_work_data'].mkdir(parents=True)
+
+    except FileExistsError:
+        for path in [x for x in cfg_update['dir_work_data'].glob('*')]:
+            path.unlink()
+
     config.update(cfg_update)
+
+    try:
+        shutil.copy(str(config['dir_in'] / 'token.pkl'), str(config['file_token']))
+
+    except FileNotFoundError:
+        pass
 
     logging.basicConfig(
         filename=config['file_log'],
